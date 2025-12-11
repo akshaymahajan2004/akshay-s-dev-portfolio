@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import emailjs from "@emailjs/browser"
 
 const Contact = () => {
   const { toast } = useToast();
@@ -60,7 +61,17 @@ const Contact = () => {
     setIsSubmitting(true);
 
     // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+    await emailjs.send(
+      "service_8wuquyn",
+      "template_x3fofcw",
+      {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      },
+      "zEnl4KuHHf9c1a_1Q"
+    );
 
     setIsSubmitting(false);
     setIsSubmitted(true);
@@ -70,6 +81,16 @@ const Contact = () => {
       title: "Message sent!",
       description: "Thank you for reaching out. I'll get back to you soon.",
     });
+  } catch (error) {
+    console.error(error);
+    setIsSubmitting(false);
+
+    toast({
+      title: "Error",
+      description: "Something went wrong. Please try again later.",
+      variant: "destructive",
+    });
+  }
   };
 
   const handleChange = (
@@ -83,8 +104,8 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: Mail, label: "Email", value: "akshay@example.com" },
-    { icon: Phone, label: "Phone", value: "+91 9876543210" },
+    { icon: Mail, label: "Email", value: "akshaymahajan730@gmail.com" },
+    { icon: Phone, label: "Phone", value: "+91 7226898168" },
     { icon: MapPin, label: "Location", value: "India" },
   ];
 

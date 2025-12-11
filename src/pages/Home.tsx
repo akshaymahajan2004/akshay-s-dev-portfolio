@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Download, Code2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import profileImage from '../assets/logo1.svg'
 const Home = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -72,9 +72,10 @@ const Home = () => {
               {/* Profile Container */}
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-primary to-accent p-1 animate-float">
                 <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Code2 size={64} className="text-primary mb-2" />
-                    <span className="text-sm">Profile Image</span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    {/* <Code2 size={64} className="text-primary mb-2" /> */}
+                    {/* <span className="text-sm">Profile Image</span> */}
+                    <img src={profileImage} alt="ProfileImage" className="w-full h-full object-cover"/>
                   </div>
                 </div>
               </div>
