@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SkillCategory } from "@/data/skills";
 
 interface SkillCardProps {
@@ -6,6 +7,16 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ category, index }: SkillCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const MAX_VISIBLE = 8;
+
+  // Calculate which skills to show
+  const visibleSkills = isExpanded
+    ? category.skills
+    : category.skills.slice(0, MAX_VISIBLE);
+
+  const remainingCount = category.skills.length - MAX_VISIBLE;
+
   return (
     <div
       className="glass-card p-6 opacity-0 animate-fade-up"
@@ -19,7 +30,7 @@ const SkillCard = ({ category, index }: SkillCardProps) => {
 
       {/* Skills Grid */}
       <div className="flex flex-wrap gap-3">
-        {category.skills.map((skill, skillIndex) => (
+        {visibleSkills.map((skill, skillIndex) => (
           <span
             key={skill}
             className="skill-badge opacity-0 animate-fade-in"
@@ -31,6 +42,16 @@ const SkillCard = ({ category, index }: SkillCardProps) => {
             {skill}
           </span>
         ))}
+
+        {/* "+X More" Button */}
+        {!isExpanded && remainingCount > 0 && (
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer border border-primary/20"
+          >
+            +{remainingCount} more
+          </button>
+        )}
       </div>
     </div>
   );

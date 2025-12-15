@@ -1,10 +1,18 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Download, Code2, Sparkles } from "lucide-react";
+import { ArrowRight, Download, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import profileImage from '../assets/logo1.svg'
+import profileImage from '../assets/logo1.svg';
+import resume from "../data/Akshay Resume.pdf"
 const Home = () => {
+  // Helper function to handle smooth scrolling
+  const scrollToProjects = () => {
+    const projectsSection = document.getElementById("projects");
+    if (projectsSection) {
+      projectsSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden pt-32 pb-20 lg:py-0">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-hero-gradient" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
@@ -40,22 +48,22 @@ const Home = () => {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 opacity-0 animate-fade-up animation-delay-400">
               <Button
-                asChild
+                onClick={scrollToProjects} // CHANGED: Now uses scroll handler
                 size="lg"
-                className="btn-glow bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                className="btn-glow bg-primary text-primary-foreground hover:bg-primary/90 px-8 cursor-pointer"
               >
-                <Link to="/projects">
-                  View Projects
-                  <ArrowRight size={18} className="ml-2" />
-                </Link>
+                View Projects
+                <ArrowRight size={18} className="ml-2" />
               </Button>
+              
               <Button
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-border hover:bg-secondary hover:text-foreground px-8"
+                className="border-border hover:bg-secondary hover:text-foreground px-8 cursor-pointer"
               >
-                <a href="#" download>
+                {/* Note: Update href to your actual CV file path */}
+                <a href={resume} download="Akshay Resume.pdf">
                   <Download size={18} className="mr-2" />
                   Download CV
                 </a>
@@ -72,10 +80,13 @@ const Home = () => {
               {/* Profile Container */}
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-primary to-accent p-1 animate-float">
                 <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center">
-                    {/* <Code2 size={64} className="text-primary mb-2" /> */}
-                    {/* <span className="text-sm">Profile Image</span> */}
-                    <img src={profileImage} alt="ProfileImage" className="w-full h-full object-cover"/>
+                  <div className="w-full h-full flex items-center justify-center bg-white">
+                     {/* Ensure image covers the circle nicely */}
+                    <img 
+                      src={profileImage} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                 </div>
               </div>
