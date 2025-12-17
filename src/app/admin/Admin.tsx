@@ -18,15 +18,15 @@ interface ProjectForm {
   description: string;
   githubLink: string;
   liveLink: string;
-  image: string;
+  image: string; // Can be a manual URL or a Firebase URL
   techStack: string; 
 }
 
 interface SkillForm {
   name: string;
   icon: string;
-  skills: string; // Comma separated string for input
-  order: number;  // Controls display priority
+  skills: string;
+  order: number;
 }
 
 interface SkillCategoryData {
@@ -81,7 +81,7 @@ export default function AdminPage() {
       const skillSnap = await getDocs(collection(db, "skills"));
       const skillsList = skillSnap.docs.map((d) => ({ id: d.id, ...d.data() } as SkillCategoryData));
       
-      // SORT SKILLS BY ORDER (Ascending: 1, 2, 3...)
+      // SORT SKILLS BY ORDER
       skillsList.sort((a, b) => (a.order || 0) - (b.order || 0));
       
       setSkillsData(skillsList);
@@ -98,7 +98,7 @@ export default function AdminPage() {
   // 2. PROJECT ACTIONS
   // ==========================
   const uploadImage = async () => {
-    if (!imageFile) return form.image;
+    if (!imageFile) return null;
     const uniqueName = `${Date.now()}-${imageFile.name}`;
     const imgRef = ref(storage, `projects/${uniqueName}`);
     await uploadBytes(imgRef, imageFile);
@@ -108,10 +108,23 @@ export default function AdminPage() {
   const handleProjectSubmit = async () => {
     if (!form.title || !form.description) return alert("Fill all required fields");
     setLoading(true);
+    
     try {
-      const imgURL = await uploadImage();
+      // LOGIC: Use manual URL first, but overwrite if a file is uploaded
+      let finalImgURL = form.image; 
+
+      if (imageFile) {
+        const uploadedUrl = await uploadImage();
+        if (uploadedUrl) finalImgURL = uploadedUrl;
+      }
+
       const techStackArray = form.techStack.split(",").map((t) => t.trim()).filter(Boolean);
-      const data = { ...form, image: imgURL, techStack: techStackArray };
+      
+      const data = { 
+        ...form, 
+        image: finalImgURL, 
+        techStack: techStackArray 
+      };
 
       if (editId) {
         await updateDoc(doc(db, "projects", editId), data);
@@ -119,6 +132,7 @@ export default function AdminPage() {
       } else {
         await addDoc(collection(db, "projects"), data);
       }
+      
       // Reset
       setForm({ title: "", description: "", githubLink: "", liveLink: "", image: "", techStack: "" });
       setImageFile(null);
@@ -141,7 +155,11 @@ export default function AdminPage() {
   const handleEditClick = (p: any) => {
     setEditId(p.id);
     setForm({
-        title: p.title, description: p.description, githubLink: p.githubLink, liveLink: p.liveLink, image: p.image,
+        title: p.title, 
+        description: p.description, 
+        githubLink: p.githubLink, 
+        liveLink: p.liveLink, 
+        image: p.image || "",
         techStack: Array.isArray(p.techStack) ? p.techStack.join(", ") : ""
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -150,32 +168,27 @@ export default function AdminPage() {
   // ==========================
   // 3. SKILL ACTIONS
   // ==========================
-  
   const handleSkillSubmit = async () => {
     if(!skillForm.name || !skillForm.icon) return alert("Category Name and Icon are required");
     setLoading(true);
 
     try {
-      // Convert "React, Node" -> ["React", "Node"]
       const skillsArray = skillForm.skills.split(",").map(s => s.trim()).filter(s => s.length > 0);
 
       const data = {
         name: skillForm.name,
         icon: skillForm.icon,
         skills: skillsArray,
-        order: Number(skillForm.order) // Ensure it saves as a number
+        order: Number(skillForm.order)
       };
 
       if (skillEditId) {
-        // Update
         await updateDoc(doc(db, "skills", skillEditId), data);
         setSkillEditId(null);
       } else {
-        // Create
         await addDoc(collection(db, "skills"), data);
       }
 
-      // Reset
       setSkillForm({ name: "", icon: "", skills: "", order: 0 });
       fetchData();
       
@@ -206,7 +219,6 @@ export default function AdminPage() {
         skills: cat.skills.join(", "),
         order: cat.order || 0
     });
-    // Scroll to form
     document.getElementById("skills-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -256,10 +268,39 @@ export default function AdminPage() {
                     <label className="text-sm font-semibold text-gray-600">Tech Stack (comma separated)</label>
                     <input className="border p-2 rounded w-full text-black" value={form.techStack} onChange={(e) => setForm({...form, techStack: e.target.value})} />
                 </div>
+                
+                {/* --- IMAGE INPUT SECTION START --- */}
                 <div className="md:col-span-2">
-                    <label className="text-sm font-semibold text-gray-600">Image</label>
-                    <input type="file" onChange={(e) => e.target.files && setImageFile(e.target.files[0])} className="text-black block w-full" />
+                    <label className="text-sm font-semibold text-gray-600">Project Image</label>
+                    <div className="flex flex-col gap-3 p-3 border border-gray-200 rounded bg-gray-50">
+                        
+                        {/* Option A: Manual URL */}
+                        <div>
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Option A: Manual URL</span>
+                            <input 
+                                type="text" 
+                                placeholder="https://example.com/my-image.png"
+                                className="mt-1 border p-2 rounded w-full text-black focus:ring-2 focus:ring-blue-500 outline-none"
+                                value={form.image} 
+                                onChange={(e) => setForm({...form, image: e.target.value})} 
+                            />
+                        </div>
+
+                        <div className="text-center text-xs text-gray-400 font-medium">- OR -</div>
+
+                        {/* Option B: File Upload */}
+                        <div>
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Option B: Upload File</span>
+                            <input 
+                                type="file" 
+                                onChange={(e) => e.target.files && setImageFile(e.target.files[0])} 
+                                className="mt-1 text-black block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+                            />
+                        </div>
+                    </div>
                 </div>
+                {/* --- IMAGE INPUT SECTION END --- */}
+
               </div>
               <div className="mt-4 flex gap-2">
                 <button onClick={handleProjectSubmit} disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
@@ -303,7 +344,6 @@ export default function AdminPage() {
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Order Field */}
                     <div className="md:col-span-1">
                         <label className="text-sm font-semibold text-gray-600">Order (1, 2, 3...)</label>
                         <input 
@@ -344,7 +384,6 @@ export default function AdminPage() {
                             value={skillForm.skills}
                             onChange={e => setSkillForm({...skillForm, skills: e.target.value})}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Separate skills with commas.</p>
                     </div>
                 </div>
 

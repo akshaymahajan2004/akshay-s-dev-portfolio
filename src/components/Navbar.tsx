@@ -72,7 +72,7 @@ const Navbar = () => {
           
           {/* Logo (Secret Admin Access) */}
           <button
-            onClick={() => navigate("/admin")}
+            onClick={() => scrollToSection("home")}
             className="text-xl font-bold text-gradient hover:opacity-80 transition-opacity"
           >
             AM

@@ -13,11 +13,23 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       className={`glass-card glow-border overflow-hidden group opacity-0 animate-fade-up`}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: "forwards" }}
     >
-      {/* Project Image */}
+      {/* --- IMAGE SECTION --- */}
       <div className="relative h-48 overflow-hidden bg-secondary">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-          <span className="text-4xl font-bold text-primary/30">{project.title[0]}</span>
-        </div>
+        
+        {/* Logic: If project has an image URL, show it. Otherwise, show gradient placeholder. */}
+        {project.image ? (
+          <img 
+            src={project.image} 
+            alt={project.title} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+            <span className="text-4xl font-bold text-primary/30">{project.title[0]}</span>
+          </div>
+        )}
+
+        {/* Overlay Buttons (Visible on Hover) */}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
           <a
             href={project.liveLink}
@@ -38,7 +50,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         </div>
       </div>
 
-      {/* Project Content */}
+      {/* --- CONTENT SECTION --- */}
       <div className="p-6">
         <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
           {project.title}
